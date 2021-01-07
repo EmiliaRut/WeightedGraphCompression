@@ -1,0 +1,12 @@
+outPrefix art
+source art.txt
+generations 200
+population 200
+tournament 5
+runs 2
+elites 1
+compression 0.10
+mutation 0.10
+crossover 0.8
+maxDistance 1
+fitness SumAbsWeightDiff

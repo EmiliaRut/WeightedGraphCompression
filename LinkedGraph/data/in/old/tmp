@@ -1,0 +1,15 @@
+#!/bin/bash
+for file in ./*.dat
+do
+  sed -i '/generations/d' $file
+  echo "generations     750" >> $file
+
+  sed -i '/population/d' $file
+  echo "population      500" >> $file
+
+  sed -i '/elitism/d' $file
+  sed -i '/elites/d' $file
+  echo "elites          2" >> $file
+
+  sed -i '/chromesome/d' $file
+done

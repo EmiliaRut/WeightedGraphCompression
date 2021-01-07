@@ -1,0 +1,12 @@
+outPrefix	aFireWork
+source	aFireWork.txt
+generations 750
+population 250
+tournament 5
+runs 30
+elites 1
+compression 0.20
+mutation 0.15
+crossover 0.9
+maxDistance 2
+fitness	AbsoluteTotalWeightDiff

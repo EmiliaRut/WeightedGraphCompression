@@ -1,0 +1,11 @@
+outPrefix	aSquare
+source	aSquare.txt
+generations 750
+population 250
+tournament 5
+runs 1
+elites 1
+compression 0.50
+mutation 0.15
+crossover 0.9
+maxDistance 1
