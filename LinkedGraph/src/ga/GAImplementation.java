@@ -42,7 +42,9 @@ source ecoli.txt
 public class GAImplementation {
 
 	private long SEED;
-    private String PREFIX;
+        
+        //parameters from file
+        private String PREFIX;
 	private String OUTPUT_FILENAME;
 	private String SOURCE_FILENAME;
 	private int GENERATION_SPAN;
@@ -57,18 +59,28 @@ public class GAImplementation {
 	private int DISTANCE_LIMIT;
 	private int GRAPH_SIZE;
 	private int RUN_SPAN;
-    private String FITNESS_METHOD;
-    private String COMPRESSION_CALC;
+        
+        private String FITNESS_METHOD;
+        private String COMPRESSION_CALC;
 	private Random RANDOM;
 	private boolean VALID;
+        private int globalBestRun;
+        
+        private LinkedGraph genBestGraph;
+        private LinkedGraph runBestGraph;
+        private LinkedGraph globalBestGraph;
+        
+        //output files
 	private BufferedWriter OUTPUT;
-    private BufferedWriter COMPRESSED_GRAPH_OUTPUT;
+        private BufferedWriter COMPRESSED_GRAPH_OUTPUT;
+        private BufferedWriter MERGED_NODES_OUTPUT;
+        private BufferedWriter DECOMPRESSED_GRAPH_OUTPUT;
 
 	private final String DEFAULT_OUTPUT = "";
 	private final float DEFAULT_RATE = -Float.MAX_VALUE;
 	private final int DEFAULT_SIZE = Integer.MIN_VALUE;
-    private final String DEFAULT_FITNESS = "AbsoluteTotalWeightDiff";
-    private final String DEFAULT_COMPRESSION_CALC = "run";
+        private final String DEFAULT_FITNESS = "AbsoluteTotalWeightDiff";
+        private final String DEFAULT_COMPRESSION_CALC = "run";
 
 	private Graph ORIGINAL_GRAPH;
 	private int[][][] POPULATION;
@@ -151,7 +163,8 @@ public class GAImplementation {
 						+ "Global Best Chromesome,"
 						+ "Run Best Chromesome,"
 						+ "Generation Best Chromesome,"
-                                                + "Generation Worst Chromosome"
+                                                + "Generation Worst Chromosome,"
+                                                + "globalBestRun"
 				);
 				this.OUTPUT.newLine();
 				this.OUTPUT.flush();
@@ -169,8 +182,10 @@ public class GAImplementation {
 			double globalBestFitness = Double.MAX_VALUE;
 			int[][] globalBest = new int[CHROMESOME_SIZE][2];
 			int[][] globalWorst = new int[CHROMESOME_SIZE][2];
+                        globalBestGraph = null;
 			long globalSum = 0;
 			this.POPULATION_FITNESS = new double[this.POPULATION_SIZE];
+                        globalBestRun = -1;
 			// Each Run
 			for (int run = 1; run <= this.RUN_SPAN; run++) {
 				initPopulation();
@@ -178,7 +193,8 @@ public class GAImplementation {
 				// Grab initial population fitness
 				for (int i = 0; i < this.POPULATION_SIZE; i++) {
 //                                        System.out.println("Evaluating chromosome " + i);
-					this.POPULATION_FITNESS[i] = this.Evaluate(this.POPULATION[i]);
+//					this.POPULATION_FITNESS[i] = this.Evaluate(this.POPULATION[i]);
+                                        this.POPULATION_FITNESS[i] = this.evaluateGraph(this.buildGraph(this.POPULATION[i]), this.POPULATION[i]);
 //                                        System.out.println("Done evaluating chromosome " + i);
 				}
 
@@ -186,6 +202,7 @@ public class GAImplementation {
 				double runBestFitness = Double.MAX_VALUE;
 				int[][] runBest = new int[CHROMESOME_SIZE][2];
 				int[][] runWorst = new int[CHROMESOME_SIZE][2];
+                                runBestGraph = null;
 				long runSum = 0;
 
 				// Each Generation
@@ -195,6 +212,7 @@ public class GAImplementation {
 					int[][] genBest = new int[CHROMESOME_SIZE][2];
 					double genWorstFitness = Double.MIN_VALUE;
 					int[][] genWorst = new int[CHROMESOME_SIZE][2];
+                                        genBestGraph = null;
 					long genSum = 0;
 					System.out.println("Thread " + Thread.currentThread().getId() + " Run " + run + " Generation " + gen);
 
@@ -227,19 +245,25 @@ public class GAImplementation {
 					// Collect fitnesses
 					for (int i = 0; i < this.POPULATION_SIZE; i++) {
 //                                                System.out.println("Evaluating chromosome " + i);
-						double fitness = this.Evaluate(generation[i]);
+//						double fitness = this.Evaluate(generation[i]);
+                                                LinkedGraph recentGraph = this.buildGraph(generation[i]);
+                                                double fitness = this.evaluateGraph(recentGraph, generation[i]);
 						this.POPULATION_FITNESS[i] = fitness;
 //                                                System.out.println("Done evaluating chromosome " + i);
 						// Collect Generation, Run, Global statistics
 						if (fitness < genBestFitness) {
 							genBest = Copy(generation[i]);
 							genBestFitness = fitness;
+                                                        genBestGraph = recentGraph;
 							if (genBestFitness < runBestFitness) {
 								runBest = Copy(genBest);
 								runBestFitness = genBestFitness;
+                                                                runBestGraph = genBestGraph;
 								if (runBestFitness < globalBestFitness) {
 									globalBest = Copy(runBest);
 									globalBestFitness = runBestFitness;
+                                                                        globalBestRun = run;
+                                                                        globalBestGraph = runBestGraph;
 								}
 							}
 						}
@@ -322,6 +346,7 @@ public class GAImplementation {
 								+ "\"" + GAImplementation.buildChromesomeString(runBest) + "\","
 								+ "\"" + GAImplementation.buildChromesomeString(genBest) + "\","
 								+ "\"" + GAImplementation.buildChromesomeString(genWorst) + "\","
+                                                                + globalBestRun + ","
 						);
 						this.OUTPUT.newLine();
 						this.OUTPUT.flush();
@@ -344,7 +369,8 @@ public class GAImplementation {
                                             genBestFileName += "_xvr" + (int) (this.CROSSOVER_RATE * 100); // crossover suffix
                                             genBestFileName += "_" + this.FITNESS_METHOD ;
                                             genBestFileName += "_Run"+run+"_"+"gen"+gen;
-                                            printCompressedGraph(genBest, genBestFileName);
+                                            printCompressedGraph(genBest, genBestFileName+"_CompressedGraph");
+                                            printDecompressedGraph(genBestGraph, genBestFileName+"_DecompressedGraph");
                                         }
 				}
                                 
@@ -357,7 +383,8 @@ public class GAImplementation {
                                     runBestFileName += "_xvr" + (int) (this.CROSSOVER_RATE * 100); // crossover suffix
                                     runBestFileName += "_" + this.FITNESS_METHOD ;
                                     runBestFileName += "_Run"+run;
-                                    printCompressedGraph(runBest, runBestFileName);
+                                    printCompressedGraph(runBest, runBestFileName+"_CompressedGraph");
+                                    printDecompressedGraph(genBestGraph, runBestFileName+"_DecompressedGraph");
                                 }
 			}
 
@@ -592,24 +619,46 @@ public class GAImplementation {
 	 * @param chromesome
 	 * @return
 	 */
-	public double Evaluate(int[][] chromesome) {
-		String chromesomeString = buildChromesomeString(chromesome);
-		if (this.CACHED_CHROMESOME_FITNESS.containsKey(chromesomeString)) {
-			return this.CACHED_CHROMESOME_FITNESS.get(chromesomeString);
-		}
-
-		LinkedGraph current = (LinkedGraph) this.ORIGINAL_GRAPH.deepCopy();
+//	public double Evaluate(int[][] chromesome) {
+//		String chromesomeString = buildChromesomeString(chromesome);
+//		if (this.CACHED_CHROMESOME_FITNESS.containsKey(chromesomeString)) {
+//			return this.CACHED_CHROMESOME_FITNESS.get(chromesomeString);
+//		}
+//
+//		LinkedGraph current = (LinkedGraph) this.ORIGINAL_GRAPH.deepCopy();
+//		// iterate through each gene
+//		for (int i = 0; i < chromesome.length; i++) {
+//			this.EvaluateGene((LinkedGraph) current, chromesome, chromesome[i]);
+//		}
+//
+//		double fitness = current.getFitness(this.FITNESS_METHOD);
+//		String currentChromesomeString = buildChromesomeString(chromesome);
+//		this.CACHED_CHROMESOME_FITNESS.put(currentChromesomeString, fitness);
+//
+//		return fitness;
+//	}
+        
+        public LinkedGraph buildGraph(int[][] chromesome) {
+            LinkedGraph current = (LinkedGraph) this.ORIGINAL_GRAPH.deepCopy();
 		// iterate through each gene
 		for (int i = 0; i < chromesome.length; i++) {
 			this.EvaluateGene((LinkedGraph) current, chromesome, chromesome[i]);
 		}
+            return current;
+        } //buildGraph
+        
+        public double evaluateGraph(LinkedGraph graph, int[][] chromesome) {
+            String chromesomeString = buildChromesomeString(chromesome);
+            if (this.CACHED_CHROMESOME_FITNESS.containsKey(chromesomeString)) {
+                    return this.CACHED_CHROMESOME_FITNESS.get(chromesomeString);
+            }
 
-		double fitness = current.getFitness(this.FITNESS_METHOD);
-		String currentChromesomeString = buildChromesomeString(chromesome);
-		this.CACHED_CHROMESOME_FITNESS.put(currentChromesomeString, fitness);
+            double fitness = graph.getFitness(this.FITNESS_METHOD);
+            String currentChromesomeString = buildChromesomeString(chromesome);
+            this.CACHED_CHROMESOME_FITNESS.put(currentChromesomeString, fitness);
 
-		return fitness;
-	}
+            return fitness;
+        }
 
 	/**
 	 * returns the fitness from the previous generation
@@ -856,6 +905,56 @@ public class GAImplementation {
 		return isProperlyBuilt();
 	}
         
+        //print the merged nodes of each node
+        private void printMergedNodes(LinkedGraph best, String filename) {
+            //print graph info
+            try {
+                    FileWriter fw = new FileWriter(OUT_DIRECTORY + filename + "_MergedNodes.txt");
+                    this.MERGED_NODES_OUTPUT = new BufferedWriter(fw);
+            } catch (Exception e) {
+                    System.out.println("Error creating write file: " + e.getMessage());
+            }
+            try {
+                    for (int n = 0; n < best.getNodes().length; n++) {
+                        if (best.getNodes()[n].getMergeNodes().size() != 0) {
+                            this.MERGED_NODES_OUTPUT.write("Node: " + n + "\n");
+                            for(Integer m: best.getNodes()[n].getMergeNodes()) {
+                                this.MERGED_NODES_OUTPUT.write(m + " ");
+                            }
+                            this.MERGED_NODES_OUTPUT.write("\n\n");
+                        }
+                    }
+                    this.MERGED_NODES_OUTPUT.close();
+            } catch (Exception e) {
+                    System.out.println("Unable to write to file: " + e.getMessage());
+            }
+            
+            
+        }
+        
+        private void printDecompressedGraph(LinkedGraph graph, String filename) {
+            //print graph info
+            try {
+                    FileWriter fw = new FileWriter(OUT_DIRECTORY + filename + ".txt");
+                    this.DECOMPRESSED_GRAPH_OUTPUT = new BufferedWriter(fw);
+            } catch (Exception e) {
+                    System.out.println("Error creating write file: " + e.getMessage());
+            }
+            try {
+                    ArrayList<Neighbors> decompressedGraph = graph.getDecompressedGraph();
+                    this.DECOMPRESSED_GRAPH_OUTPUT.write(this.GRAPH_SIZE + "\n");
+                    for(int n = 0; n < decompressedGraph.size(); n++) {
+                        for(NodeEdge e: decompressedGraph.get(n).getNeighbors()) {
+                            this.DECOMPRESSED_GRAPH_OUTPUT.write(n + "\t" + e.getNode() + "\t" + e.getWeight() + "\n");
+                        }
+                    }
+//                    this.DECOMPRESSED_GRAPH_OUTPUT.newLine();
+                    this.DECOMPRESSED_GRAPH_OUTPUT.close();
+            } catch (Exception e) {
+                    System.out.println("Unable to write to file: " + e.getMessage());
+            }
+        } //printDecompressedGraph
+        
         //build and print the compressed graph
         private void printCompressedGraph(int[][] chromesome, String filename) {
             
@@ -887,7 +986,8 @@ public class GAImplementation {
                         }
                     }
 //                    this.COMPRESSED_GRAPH_OUTPUT.newLine();
-                    this.COMPRESSED_GRAPH_OUTPUT.flush();
+                    this.COMPRESSED_GRAPH_OUTPUT.close();
+                    printMergedNodes(current, filename);
             } catch (Exception e) {
                     System.out.println("Unable to write to file: " + e.getMessage());
             }

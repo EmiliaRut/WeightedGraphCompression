@@ -74,6 +74,10 @@ public class LinkedGraph implements Graph {
 			this.ORIGINAL_MATRIX.add(new Neighbors());
 		}
 	}
+        
+        public Node[] getNodes() {
+            return this.NODES;
+        }//getNodes
 
 	/**
 	 * Getter method for MAX SIZE
@@ -547,6 +551,10 @@ public class LinkedGraph implements Graph {
         public ArrayList<Neighbors> getCompressedGraph() {
             return this.COMPRESSED_MATRIX;
         } //getCompressedGraph
+        
+        public ArrayList<Neighbors> getDecompressedGraph() {
+            return this.DECOMPRESSED_MATRIX;
+        } //getDecompressedGraph
 
 	public int printFakeLinks() {
 //		int total = 0;

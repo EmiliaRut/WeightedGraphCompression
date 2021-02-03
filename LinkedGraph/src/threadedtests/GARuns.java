@@ -14,17 +14,14 @@ import java.util.ArrayList;
  */
 public class GARuns {
 
-	public static final int MAX_THREADS = 6;
+	public static final int MAX_THREADS = 2;
 	public static final int FIRST_TEST = 1;
-	public static final int LAST_TEST = 1;
+	public static final int LAST_TEST = 2;
 	public static final String[] TESTS = new String[]{
-//		"ecoli?.dat",
-//		"yeast?.dat",
-//		"figeys?.dat"
-                "art?.dat"
-//                "aline?.dat"
-//            "aSquare?.dat"
-//            "aFireWork?.dat"
+//                "June2_?.dat"
+//                "Apr28_?.dat"
+//                "July7_?.dat"
+                "July15_?.dat"
 	};
 	
 	

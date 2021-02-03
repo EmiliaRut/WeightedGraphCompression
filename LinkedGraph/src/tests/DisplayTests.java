@@ -18,14 +18,14 @@ public class DisplayTests {
     
     private static final String DIRECTORY = "data\\compressedGraphs\\";
 
-    public static void main(String args[]) {
-        
-        System.out.println("DisplayTest is running");
-        
-        File[] files = new File(DIRECTORY).listFiles();
-        
-        for(File f: files) {
-            GraphDisplay.displayLinkedGraph(f);
-        }
-    }
+//    public static void main(String args[]) {
+//        
+//        System.out.println("DisplayTest is running");
+//        
+//        File[] files = new File(DIRECTORY).listFiles();
+//        
+//        for(File f: files) {
+//            GraphDisplay.displayLinkedGraph(f);
+//        }
+//    }
 }
