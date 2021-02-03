@@ -1,2 +1,5 @@
+#ignore everything in the data folder
+/LinkedGraph/data/
+
 *.csv
 *.zip
