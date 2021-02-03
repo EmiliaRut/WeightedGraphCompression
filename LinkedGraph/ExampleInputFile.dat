@@ -1,0 +1,14 @@
+#Note: this file should be in data/in (create directory yourself)
+# All results from GA will be placed in data/out (create directory yourself)
+outPrefix Apr28
+source Apr28.txt
+generations 400
+population 250
+tournament 5
+runs 30
+elites 1
+compression 0.40
+mutation 0.15
+crossover 0.9
+maxDistance 1
+fitness SumSqrWeightDiff
