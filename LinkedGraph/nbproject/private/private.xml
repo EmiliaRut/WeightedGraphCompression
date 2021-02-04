@@ -3,11 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Emilia/Documents/Master/COSC%205F90%20(MSc%20Thesis)/First%20Paper%20(Attempt)%20-%20Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/linkedgraph/Node.java</file>
-            <file>file:/C:/Users/Emilia/Documents/Master/COSC%205F90%20(MSc%20Thesis)/First%20Paper%20(Attempt)%20-%20Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/ga/GAImplementation.java</file>
-            <file>file:/C:/Users/Emilia/Documents/Master/COSC%205F90%20(MSc%20Thesis)/First%20Paper%20(Attempt)%20-%20Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/tests/DisplayTests.java</file>
-            <file>file:/C:/Users/Emilia/Documents/Master/COSC%205F90%20(MSc%20Thesis)/First%20Paper%20(Attempt)%20-%20Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/threadedtests/GARuns.java</file>
-            <file>file:/C:/Users/Emilia/Documents/Master/COSC%205F90%20(MSc%20Thesis)/First%20Paper%20(Attempt)%20-%20Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/linkedgraph/LinkedGraph.java</file>
+            <file>file:/C:/Users/Emilia/Documents/Master/Conference%20Papers/Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/ga/GAImplementation.java</file>
+            <file>file:/C:/Users/Emilia/Documents/Master/Conference%20Papers/Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/threadedtests/GARuns.java</file>
+            <file>file:/C:/Users/Emilia/Documents/Master/Conference%20Papers/Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/linkedgraph/LinkedGraph.java</file>
+            <file>file:/C:/Users/Emilia/Documents/Master/Conference%20Papers/Graph%20Compression%20With%20Weights/ACompletelyNonAcademicProject-main%20(with%20Edge%20Class)/WeightedGraphCompression/LinkedGraph/src/linkedgraph/FindFitness.java</file>
         </group>
     </open-files>
 </project-private>
