@@ -305,81 +305,49 @@ public class LinkedGraph implements Graph {
                 }
                 
                 //add/update an edge with new weight between slave and master
-                double numOfEdges = 1; //edge between slave and master
-                double totalWeight = this.DECOMPRESSED_MATRIX.get(slave).weightOf(master); //weight between slave and master
-                for(int mNodes: this.NODES[master].getMergeNodes()) { //edges between slave and master merges
-                    totalWeight = totalWeight + this.DECOMPRESSED_MATRIX.get(slave).weightOf(mNodes);
-                    totalWeight = totalWeight + this.DECOMPRESSED_MATRIX.get(master).weightOf(mNodes);
-                    numOfEdges += 2;
-                    for(int sNodes: this.NODES[slave].getMergeNodes()) {
-                        totalWeight = totalWeight + this.DECOMPRESSED_MATRIX.get(mNodes).weightOf(sNodes);
-                        numOfEdges++;
-                    }
-                }
-                for(int sNodes: this.NODES[slave].getMergeNodes()) { //edges between master and slave merges
-                    totalWeight = totalWeight + this.DECOMPRESSED_MATRIX.get(master).weightOf(sNodes);
-                    totalWeight = totalWeight + this.DECOMPRESSED_MATRIX.get(slave).weightOf(sNodes);
-                    numOfEdges += 2;
-                }
-                double newEdgeWeight = totalWeight/numOfEdges;
-
-                //update or add weight between slave and master
-                if(this.DECOMPRESSED_MATRIX.get(master).containsNode(slave)) {
-                    this.DECOMPRESSED_MATRIX.get(master).setWightOfNode(slave, newEdgeWeight);
-                    this.DECOMPRESSED_MATRIX.get(slave).setWightOfNode(master, newEdgeWeight);
-                } else {
-                    this.DECOMPRESSED_MATRIX.get(master).addNodeAndWeight(slave, newEdgeWeight);
-                    this.DECOMPRESSED_MATRIX.get(slave).addNodeAndWeight(master, newEdgeWeight);
+                int numOfMasterMergedNodes = 1 + this.NODES[master].getMergeNodes().size();
+                int numOfMasterEdges = (numOfMasterMergedNodes*(numOfMasterMergedNodes-1))/2;
+                int numOfSlaveMergedNodes = 1 + this.NODES[slave].getMergeNodes().size();
+                int numOfSlaveEdges = (numOfSlaveMergedNodes*(numOfSlaveMergedNodes-1))/2;
+                int totalNumOfNodes = numOfMasterMergedNodes + numOfSlaveMergedNodes; // two for slave and master themselves
+                double numOfEdges = (totalNumOfNodes * (totalNumOfNodes-1))/2;
+                double remainingEdges = numOfEdges - numOfSlaveEdges - numOfMasterEdges;
+                
+                double slaveEdgeWeight = 0, masterEdgeWeight = 0;
+                if(this.NODES[slave].getMergeNodes().iterator().hasNext()) {
+                    int slaveMergedNode = this.NODES[slave].getAnyMergedNode();
+                    slaveEdgeWeight = this.DECOMPRESSED_MATRIX.get(slave).weightOf(slaveMergedNode);
                 }
                 
-                //for all slave merge nodes
-                for(int sNode: this.NODES[slave].getMergeNodes()) {
-                    //update or add weight between slave merge and master
-                    if(this.DECOMPRESSED_MATRIX.get(master).containsNode(sNode)) {
-                        this.DECOMPRESSED_MATRIX.get(master).setWightOfNode(sNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(sNode).setWightOfNode(master, newEdgeWeight);
-                    } else {
-                        this.DECOMPRESSED_MATRIX.get(master).addNodeAndWeight(sNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(sNode).addNodeAndWeight(master, newEdgeWeight);
-                    }
-                    //update or add weight between slave merge and slave
-                    if(this.DECOMPRESSED_MATRIX.get(slave).containsNode(sNode)) {
-                        this.DECOMPRESSED_MATRIX.get(slave).setWightOfNode(sNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(sNode).setWightOfNode(slave, newEdgeWeight);
-                    } else {
-                        this.DECOMPRESSED_MATRIX.get(slave).addNodeAndWeight(sNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(sNode).addNodeAndWeight(slave, newEdgeWeight);
-                    }
-                    //for all master merges
-                    for(int mNode: this.NODES[master].getMergeNodes()) {
-                        //update or add weight
-                        if(this.DECOMPRESSED_MATRIX.get(sNode).containsNode(mNode)) {
-                            this.DECOMPRESSED_MATRIX.get(sNode).setWightOfNode(mNode, newEdgeWeight);
-                            this.DECOMPRESSED_MATRIX.get(mNode).setWightOfNode(sNode, newEdgeWeight);
-                        } else {
-                            this.DECOMPRESSED_MATRIX.get(sNode).addNodeAndWeight(mNode, newEdgeWeight);
-                            this.DECOMPRESSED_MATRIX.get(mNode).addNodeAndWeight(sNode, newEdgeWeight);
+                if(this.NODES[master].getMergeNodes().iterator().hasNext()) {
+                    int masterMergedNode = this.NODES[master].getAnyMergedNode();
+                    masterEdgeWeight = this.DECOMPRESSED_MATRIX.get(master).weightOf(masterMergedNode);
+                }
+                
+                double totalWeight = (slaveEdgeWeight * numOfSlaveEdges) + (masterEdgeWeight*numOfMasterEdges) + (this.DECOMPRESSED_MATRIX.get(master).weightOf(slave) * remainingEdges);
+                double newEdgeWeight = totalWeight/numOfEdges;
+                
+                //update weights
+                ArrayList<Integer> completeGraph = new ArrayList<>();
+                completeGraph.addAll(this.NODES[master].getMergeNodes()); // add masters merged nodes
+                completeGraph.add(master); //add master itself
+                completeGraph.addAll(this.NODES[slave].getMergeNodes()); // add slaves merged nodes
+                completeGraph.add(slave); //add slave itself
+                
+                while(!completeGraph.isEmpty()) {
+                    int nOne = completeGraph.get(0);
+                    for(int nTwo: completeGraph) {
+                        if(nOne != nTwo) {
+                            if(this.DECOMPRESSED_MATRIX.get(nOne).containsNode(nTwo)) {
+                                this.DECOMPRESSED_MATRIX.get(nOne).setWightOfNode(nTwo, newEdgeWeight);
+                                this.DECOMPRESSED_MATRIX.get(nTwo).setWightOfNode(nOne, newEdgeWeight);
+                            } else {
+                                this.DECOMPRESSED_MATRIX.get(nOne).addNodeAndWeight(nTwo, newEdgeWeight);
+                                this.DECOMPRESSED_MATRIX.get(nTwo).addNodeAndWeight(nOne, newEdgeWeight);
+                            }
                         }
                     }
-                }
-                //for all master merge
-                for(int mNode: this.NODES[master].getMergeNodes()) {
-                    //update or add weight between slave and master merge
-                    if(this.DECOMPRESSED_MATRIX.get(slave).containsNode(mNode)) {
-                        this.DECOMPRESSED_MATRIX.get(slave).setWightOfNode(mNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(mNode).setWightOfNode(slave, newEdgeWeight);
-                    } else {
-                        this.DECOMPRESSED_MATRIX.get(slave).addNodeAndWeight(mNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(mNode).addNodeAndWeight(slave, newEdgeWeight);
-                    }
-                    //update or add weight between master and master merge
-                    if(this.DECOMPRESSED_MATRIX.get(master).containsNode(mNode)) {
-                        this.DECOMPRESSED_MATRIX.get(master).setWightOfNode(mNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(mNode).setWightOfNode(master, newEdgeWeight);
-                    } else {
-                        this.DECOMPRESSED_MATRIX.get(master).addNodeAndWeight(mNode, newEdgeWeight);
-                        this.DECOMPRESSED_MATRIX.get(mNode).addNodeAndWeight(master, newEdgeWeight);
-                    }
+                    completeGraph.remove(0);
                 }
 
                 //add the slave as a merged node of master

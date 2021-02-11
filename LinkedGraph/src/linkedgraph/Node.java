@@ -38,6 +38,13 @@ public class Node {
 	public Node(Node other) {
 		this(other.ID);
 	}
+        
+        public int getAnyMergedNode() {
+            for(Integer n: this.MERGED_NODES) {
+                return n;
+            }
+            return -1;
+        } //getAnyMergedNode
 
 	public void absorb(int node) {
 		this.MERGED_NODES.add(node);
