@@ -19,9 +19,9 @@ import java.util.logging.Logger;
  */
 public class FindFitness {
     
-    private static String INPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Graph Compression and Community Detection\\test";
-    private static String OUTPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Graph Compression and Community Detection\\";
-    private static String OUTPUT_FILE = "CommunityFitnessResults - SumAbsWeightDiff - test";
+    private static String INPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Graph Compression and Community Detection\\Chromosome solutions\\SumSqrWeightDiff";
+    private static String OUTPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Graph Compression and Community Detection\\Chromosome solutions\\";
+    private static String OUTPUT_FILE = "SumSqrWeightDiff Graph Compression Results - SumSqrWeightDiff";
     private BufferedWriter RESULT_OUTPUT;
     private BufferedWriter DECOMPRESSED_GRAPH_OUTPUT;
     
@@ -45,7 +45,7 @@ public class FindFitness {
         if (directoryListing != null) {
             for (File child : directoryListing) {
                 String filename = child.getName();
-//                System.out.println("File: " + filename);
+                System.out.println("File: " + filename);
                 
                 //get the source file name
                 String graph = "";
@@ -70,20 +70,20 @@ public class FindFitness {
                 
                 //type
                 if(!graph.equals("")) {
-                    if (filename.split("_")[2].equals("adj")) {
+                    if (filename.split("_")[2].equalsIgnoreCase("adj")) {
                         graph = graph + "_adjusted";
                     }
                 }
                 
                 if (graph.equals("")) {
                     graph = filename.split("_")[0];
-                    if (filename.split("_")[1].equalsIgnoreCase("adjusted")) {
+                    if (filename.split("_")[1].equalsIgnoreCase("adjusted") || filename.split("_")[1].equalsIgnoreCase("adj")) {
                         graph = graph+"_adjusted";
                     }
                 }
                 
                 //get the fitness method
-                this.FITNESS_METHOD = "SumAbsWeightDiff"; //"Sum" + filename.split("_Sum")[1].split("_")[0];
+                this.FITNESS_METHOD = "SumSqrWeightDiff"; //"Sum" + filename.split("_Sum")[1].split("_")[0];
                 
                 //create the linked graph object
                 LinkedGraph g = LinkedGraph.load(graph+".txt");
@@ -98,8 +98,8 @@ public class FindFitness {
                         String[] line = s.next().split(",");
                         if (line.length > 1) {
                             for(int n = 1; n < line.length; n++) {
-                                int nodeOne = Integer.parseInt(line[0]);
-                                int nodeTwo = Integer.parseInt(line[n]);
+                                int nodeOne = Integer.parseInt(line[n]);
+                                int nodeTwo = Integer.parseInt(line[0]);
                                 this.GRAPH.merge(nodeTwo, nodeOne);
 //                                System.out.println("merge node " + nodeOne + " with node " + nodeTwo);
                             }
@@ -114,6 +114,7 @@ public class FindFitness {
                 //Calculate fitness of the compressed graph
                 try {
                     double fitness = this.GRAPH.getFitness(this.FITNESS_METHOD);
+                    if(this.FITNESS_METHOD == "SumSqrWeightDiff") fitness = Math.sqrt(fitness);
                     this.RESULT_OUTPUT.write(filename.replace(".csv", "") + " = " + fitness + "\n");
                     System.out.println(filename.replace(".csv", "") + " = " + fitness + "\n");
                 } catch (IOException ex) {

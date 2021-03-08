@@ -305,11 +305,11 @@ public class LinkedGraph implements Graph {
                 }
                 
                 //add/update an edge with new weight between slave and master
-                int numOfMasterMergedNodes = 1 + this.NODES[master].getMergeNodes().size();
+                int numOfMasterMergedNodes = 1 + this.NODES[master].getMergeNodes().size(); //one for master iteself
                 int numOfMasterEdges = (numOfMasterMergedNodes*(numOfMasterMergedNodes-1))/2;
-                int numOfSlaveMergedNodes = 1 + this.NODES[slave].getMergeNodes().size();
+                int numOfSlaveMergedNodes = 1 + this.NODES[slave].getMergeNodes().size(); //one for slave itself
                 int numOfSlaveEdges = (numOfSlaveMergedNodes*(numOfSlaveMergedNodes-1))/2;
-                int totalNumOfNodes = numOfMasterMergedNodes + numOfSlaveMergedNodes; // two for slave and master themselves
+                int totalNumOfNodes = numOfMasterMergedNodes + numOfSlaveMergedNodes;
                 double numOfEdges = (totalNumOfNodes * (totalNumOfNodes-1))/2;
                 double remainingEdges = numOfEdges - numOfSlaveEdges - numOfMasterEdges;
                 

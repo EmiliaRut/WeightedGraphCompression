@@ -15,13 +15,13 @@ import java.util.ArrayList;
 public class GARuns {
 
 	public static final int MAX_THREADS = 1;
-	public static final int FIRST_TEST = 3;
-	public static final int LAST_TEST = 3;
+	public static final int FIRST_TEST = 2;
+	public static final int LAST_TEST = 2;
 	public static final String[] TESTS = new String[]{
-                "June2_?.dat"
+//                "June2_?.dat"
 //                "Apr28_?.dat"
 //                "July7_?.dat"
-//                "July15_?.dat"
+                "July15_?.dat"
 	};
 	
 	
