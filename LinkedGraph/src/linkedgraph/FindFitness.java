@@ -19,9 +19,9 @@ import java.util.logging.Logger;
  */
 public class FindFitness {
     
-    private static String INPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Graph Compression and Community Detection\\Chromosome solutions\\SumSqrWeightDiff";
-    private static String OUTPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Graph Compression and Community Detection\\Chromosome solutions\\";
-    private static String OUTPUT_FILE = "SumSqrWeightDiff Graph Compression Results - SumSqrWeightDiff";
+    private static String INPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Weighted Graph Compression with NSGA-II\\test";
+    private static String OUTPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Weighted Graph Compression with NSGA-II\\testOut\\";
+    private static String OUTPUT_FILE = "SumAbsWeightDiff Graph Compression Results - nsga-ii";
     private BufferedWriter RESULT_OUTPUT;
     private BufferedWriter DECOMPRESSED_GRAPH_OUTPUT;
     
@@ -83,7 +83,7 @@ public class FindFitness {
                 }
                 
                 //get the fitness method
-                this.FITNESS_METHOD = "SumSqrWeightDiff"; //"Sum" + filename.split("_Sum")[1].split("_")[0];
+                this.FITNESS_METHOD = "SumAbsWeightDiff"; //"Sum" + filename.split("_Sum")[1].split("_")[0];
                 
                 //create the linked graph object
                 LinkedGraph g = LinkedGraph.load(graph+".txt");
