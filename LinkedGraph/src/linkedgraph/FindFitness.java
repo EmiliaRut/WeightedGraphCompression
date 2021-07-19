@@ -19,11 +19,12 @@ import java.util.logging.Logger;
  */
 public class FindFitness {
     
-    private static String INPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Weighted Graph Compression with NSGA-II\\test";
-    private static String OUTPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\Conference Papers\\Weighted Graph Compression with NSGA-II\\testOut\\";
-    private static String OUTPUT_FILE = "SumAbsWeightDiff Graph Compression Results - nsga-ii";
+    private static String INPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\COSC 5F90 (MSc Thesis)\\AdjustedRandIndex\\Input\\Converted";
+    private static String OUTPUTDIR = "C:\\Users\\Emilia\\Documents\\Master\\COSC 5F90 (MSc Thesis)\\AdjustedRandIndex\\Output\\MergedNodes\\";
+    private static String OUTPUT_FILE = "FitnessChromsOfFirstPaper";
     private BufferedWriter RESULT_OUTPUT;
     private BufferedWriter DECOMPRESSED_GRAPH_OUTPUT;
+    private BufferedWriter MERGED_NODES_OUTPUT;
     
     private int GRAPH_SIZE;
     private LinkedGraph GRAPH;
@@ -48,42 +49,27 @@ public class FindFitness {
                 System.out.println("File: " + filename);
                 
                 //get the source file name
-                String graph = "";
-                //month
-                if (filename.split("_")[0].equals("04")) {
-                    graph = graph + "Apr";
-                } else if(filename.split("_")[0].equals("06")) {
-                    graph = graph + "June";
-                } else if(filename.split("_")[0].equals("07")) {
-                    graph = graph + "July";
-                }
-                //day
-                if (filename.split("_")[1].equals("28")) {
-                    graph = graph + "28";
-                } else if(filename.split("_")[1].equals("02")) {
-                    graph = graph + "2";
-                } else if(filename.split("_")[1].equals("07")) {
-                    graph = graph + "7";
-                } else if(filename.split("_")[1].equals("15")) {
-                    graph = graph + "15";
-                }
+                String graph = filename.split("_")[0];
                 
                 //type
-                if(!graph.equals("")) {
-                    if (filename.split("_")[2].equalsIgnoreCase("adj")) {
-                        graph = graph + "_adjusted";
-                    }
+                if(filename.split("_")[1].equals("adj")) {
+                    graph = graph + "_adjusted";
                 }
                 
-                if (graph.equals("")) {
-                    graph = filename.split("_")[0];
-                    if (filename.split("_")[1].equalsIgnoreCase("adjusted") || filename.split("_")[1].equalsIgnoreCase("adj")) {
-                        graph = graph+"_adjusted";
-                    }
-                }
+                System.out.println("Graph = " + graph);
                 
                 //get the fitness method
-                this.FITNESS_METHOD = "SumAbsWeightDiff"; //"Sum" + filename.split("_Sum")[1].split("_")[0];
+                if(filename.contains("SumAbs")) {
+                    this.FITNESS_METHOD = "SumAbsWeightDiff";
+                    System.out.println("Fitness Function: SumAbsWeightDiff");
+                } else if (filename.contains("SumSqr")) {
+                    this.FITNESS_METHOD = "SumSqrWeightDiff";
+                    System.out.println("Fitness Function: SumSqrWeightDiff");
+                } else if (filename.contains("none")) {
+                    this.FITNESS_METHOD = "error";
+                    System.out.println("No valid fitness function");
+                }
+                
                 
                 //create the linked graph object
                 LinkedGraph g = LinkedGraph.load(graph+".txt");
@@ -96,10 +82,12 @@ public class FindFitness {
                     s = new Scanner(child);
                     while(s.hasNext()) {
                         String[] line = s.next().split(",");
+                        System.out.println("s = " + line[0] + " and " + line[1]);
                         if (line.length > 1) {
                             for(int n = 1; n < line.length; n++) {
-                                int nodeOne = Integer.parseInt(line[n]);
-                                int nodeTwo = Integer.parseInt(line[0]);
+                                int nodeOneOffset = Integer.parseInt(line[n]);
+                                int nodeTwo = Integer.parseInt(line[0].replaceAll("\\p{C}", ""));
+                                int nodeOne = (nodeTwo + nodeOneOffset) % this.GRAPH_SIZE;
                                 this.GRAPH.merge(nodeTwo, nodeOne);
 //                                System.out.println("merge node " + nodeOne + " with node " + nodeTwo);
                             }
@@ -110,6 +98,7 @@ public class FindFitness {
 		}
                 
 //                printDecompressedGraph(g, graph+"_DecompressedGraph");
+                printMergedNodes(g, filename.replace(".csv", ""));
                 
                 //Calculate fitness of the compressed graph
                 try {
@@ -156,6 +145,35 @@ public class FindFitness {
                     System.out.println("Unable to write to file: " + e.getMessage());
             }
         } //printDecompressedGraph
+    
+    //print the merged nodes of each node
+        private void printMergedNodes(LinkedGraph best, String filename) {
+            //print graph info
+            try {
+                    FileWriter fw = new FileWriter(OUTPUTDIR + filename + "_MergedNodes.csv");
+                    this.MERGED_NODES_OUTPUT = new BufferedWriter(fw);
+            } catch (Exception e) {
+                    System.out.println("Error creating write file: " + e.getMessage());
+            }
+            try {
+                    for (int n = 0; n < best.getNodes().length; n++) {
+                        String community = n + ",";
+                        if (!best.getNodes()[n].getMergeNodes().isEmpty()) {
+                            for(Integer m: best.getNodes()[n].getMergeNodes()) {
+                                community = community + m + ",";
+                            }
+                        }
+                        this.MERGED_NODES_OUTPUT.write(community);
+                        this.MERGED_NODES_OUTPUT.newLine();
+                    }
+                    this.MERGED_NODES_OUTPUT.close();
+                    System.out.println("Wrote merged nodes file.");
+            } catch (Exception e) {
+                    System.out.println("Unable to write to file: " + e.getMessage());
+            }
+            
+            
+        } //printMergedNodes
     
     public static void main(String[] args) { FindFitness f = new FindFitness(); };
     
